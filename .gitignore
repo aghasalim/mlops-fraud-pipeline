@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+.env
+data/predictions.jsonl
+mlflow.db
+mlartifacts/
+# model.pkl is committed (1.2 MB): the service and image need it.
+mlflow.db

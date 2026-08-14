@@ -1,0 +1,6 @@
+scenario,caught,features_flagged,share,pred_psi,pred_mean,top_feature,top_psi
+healthy (control),False,1/40,0.025,0.02,0.0429,id_31,0.166
+currency units bug,True,3/40,0.075,0.494,0.0613,TransactionAmt,11.854
+new customer segment,True,3/40,0.075,0.079,0.0442,card1_freq,0.564
+identity feed outage,True,1/40,0.025,0.033,0.0415,C10,0.083
+label shift only,False,1/40,0.025,0.02,0.0429,id_31,0.166
