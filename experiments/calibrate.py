@@ -1,4 +1,11 @@
-"""Calibrate alert thresholds against the null that actually occurs.
+"""Measure what the alert rules do on traffic with no injected fault.
+
+Originally written to set thresholds so that these windows stay silent. That
+turned out to be the wrong objective: scored out-of-sample the same windows lose
+0.06-0.137 AUC, so they are fault-free but not healthy, and calibrating until
+they go quiet would have tuned away a correct warning. The output therefore
+reports rates without labelling them false -- deciding that needs
+drift_vs_degradation.csv, not this file.
 
 The healthy control in `detector_validation.py` splits one period at random, so
 it holds everything constant including the calendar. Production never looks like
@@ -57,15 +64,20 @@ def main() -> None:
 
     out = pd.DataFrame(rows)
     print(out.to_string(index=False))
-    print("\nhealthy maxima -- thresholds must sit ABOVE these to avoid crying wolf:")
+    print("\nfault-free maxima. NOTE: 'fault-free' means nothing was injected --")
+    print("it does NOT mean these windows are healthy. Scored out-of-sample they")
+    print("lose 0.06-0.137 AUC, so an alarm here is not necessarily a false one,")
+    print("and tuning the threshold until they go quiet tunes away a true signal.")
     print(f"  share_flagged  max {out['share_flagged'].max():.3f}"
           f"   (current threshold {config.BATCH_DRIFT_SHARE})")
     print(f"  null_delta     max {out['max_null_delta'].max():.3f}"
           f"   (current threshold {config.NULL_JUMP})")
     print(f"  pred_psi       max {out['pred_psi'].max():.3f}"
           f"   (current threshold {config.PSI_MAJOR})")
-    print(f"\nfalse alarms at current settings: "
-          f"{int(out['would_alert'].sum())}/{len(out)} healthy windows")
+    print(f"\nalarms at current settings: "
+          f"{int(out['would_alert'].sum())}/{len(out)} fault-free windows "
+          f"(cross-reference reports/drift_vs_degradation.csv before calling "
+          f"any of them false)")
 
     config.REPORTS.mkdir(parents=True, exist_ok=True)
     out.to_csv(config.REPORTS / "calibration.csv", index=False)
