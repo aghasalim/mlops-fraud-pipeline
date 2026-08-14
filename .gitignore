@@ -6,6 +6,6 @@ __pycache__/
 .env
 data/predictions.jsonl
 mlflow.db
+mlruns/
 mlartifacts/
 # model.pkl is committed (1.2 MB): the service and image need it.
-mlflow.db
