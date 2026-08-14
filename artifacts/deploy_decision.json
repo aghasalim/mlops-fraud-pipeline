@@ -1,0 +1,10 @@
+{
+  "deployable": true,
+  "checks": {
+    "val_auc_ok": true,
+    "n_features_ok": true,
+    "train_rows_ok": true,
+    "model_loads": true
+  },
+  "model_version": "fraud-lgbm-v1"
+}

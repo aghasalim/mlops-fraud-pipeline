@@ -1,0 +1,4 @@
+correction,mean_flagged,max_flagged,mean_ks_only,batch_false_alarm_rate
+bh,0.0,0,0.0,0.0
+bonferroni,0.0,0,0.0,0.0
+none,0.0,0,3.35,0.0
