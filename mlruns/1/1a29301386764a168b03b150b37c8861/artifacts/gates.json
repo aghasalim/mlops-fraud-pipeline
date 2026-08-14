@@ -1,5 +1,0 @@
-{
-  "min_val_auc": 0.85,
-  "max_n_features": 500,
-  "min_train_rows": 500000
-}
