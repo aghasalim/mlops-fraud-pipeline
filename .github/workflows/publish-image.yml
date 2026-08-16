@@ -1,0 +1,76 @@
+name: publish-image
+
+# Builds and publishes the serving container to GHCR. Built in GitHub's network
+# rather than from a laptop, so the published image can never drift from main.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - Dockerfile
+      - requirements.txt
+      - src/**
+      - app/**
+      - artifacts/model.pkl
+      - .github/workflows/publish-image.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The runner ships ~30 GB of preinstalled toolchains this build never
+      # touches; torch plus the layer cache needs the room.
+      - name: Reclaim runner disk
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          df -h /
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      # linux/amd64 only: what most cloud hosts run. arm64 would need QEMU
+      # emulation for the LightGBM install, far too slow to be worth it -- build
+      # locally with `make docker` on Apple Silicon instead.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # A published image that starts and then cannot score is worse than none,
+      # so the smoke test asserts a real prediction rather than just a 200.
+      - name: Smoke-test the published image
+        run: |
+          docker run -d --name smoke -p 8000:8000 ghcr.io/${{ github.repository }}:latest
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8000/health >/dev/null; then break; fi
+            sleep 5
+          done
+          curl -sf http://localhost:8000/health
+          curl -sf -X POST http://localhost:8000/predict \
+            -H 'content-type: application/json' \
+            -d '{"TransactionAmt": 120.0}' | tee /dev/stderr | grep -q fraud_probability
