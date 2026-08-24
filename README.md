@@ -14,7 +14,38 @@ monitor caught, and what it missed until I fixed it.
 
 ---
 
-## The short version
+
+---
+
+## Abstract
+
+A fraud model behind FastAPI with CI gating and drift monitoring — and an
+evaluation of whether the drift monitoring is worth having.
+
+Five failure scenarios are injected into the serving data. The monitor catches
+three. The two it misses are the informative ones: a pure label shift changes the
+fraud rate without touching any input distribution, so a monitor watching features
+is structurally blind to it, and no threshold setting fixes that.
+
+More awkwardly, over eight held-out windows the correlation between the drift
+signal and the actual AUC degradation is **negative**, about −0.71. The window
+with the largest degradation has one of the lowest PSI values; the window with the
+highest PSI has the smallest drop. On this data the signal points the wrong way,
+which is worth knowing before it is wired to a pager.
+
+The multiplicity control is the part that works cleanly. Forty features tested per
+batch is forty chances to be unlucky, and an uncorrected KS test flags 3.35
+features per batch on healthy data. Both Benjamini-Hochberg and Bonferroni take
+that to zero false alarms.
+
+**Contributions.** (i) Injected-failure scenarios with the misses reported rather
+than tuned away. (ii) A direct comparison of the drift signal against measured
+degradation. (iii) A healthy control quantifying the false-alarm rate. (iv) A
+deployment gate that blocks on model checks rather than on a metric threshold.
+
+---
+
+## 1. The short version
 
 **3 of 3 injected failures caught, 0 false alarms on 2 controls.** That is the
 result the brief asks for, and it is the least interesting thing I found.
@@ -45,7 +76,20 @@ look normal, so we're fine."
 
 ---
 
-## What the monitor did
+## 2. What the monitor did
+
+![which injected failures the monitor catches](reports/figures/scenarios.png)
+
+![the drift signal against actual degradation](reports/figures/drift-vs-degradation.png)
+
+The right-hand panel is the uncomfortable one. If the drift signal tracked
+degradation these points would rise; instead they fall, at a correlation of −0.71.
+A monitor whose signal is anti-correlated with the harm it exists to detect is
+worse than no monitor, because it consumes attention.
+
+![false alarms on healthy data](reports/figures/false-alarms.png)
+
+![the alerting rule window by window](reports/figures/calibration-windows.png)
 
 | scenario | caught? | how |
 |---|---|---|
@@ -67,7 +111,7 @@ through.
 
 ---
 
-## Running it
+## 3. Running it
 
 ```bash
 make setup && make test
@@ -92,7 +136,7 @@ make validate && make simulate && make dashboard
 
 ---
 
-## How it fits together
+## 4. How it fits together
 
 | piece | choice | why |
 |---|---|---|
@@ -110,7 +154,7 @@ count doubled, and one that fails to load are each rejected.
 
 ---
 
-## What this cannot do
+## 5. Limitations
 
 Stated because a monitoring write-up without a limits section is marketing:
 
@@ -127,6 +171,6 @@ Stated because a monitoring write-up without a limits section is marketing:
 Full detail, including the thresholds I set wrong in both directions before
 calibrating them, in **[INCIDENT.md](INCIDENT.md)**.
 
-## License
+## 6. Licence
 
 MIT — see [LICENSE](LICENSE).
