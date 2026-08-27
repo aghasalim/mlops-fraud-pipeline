@@ -1,10 +1,10 @@
 # Incident log
 
-What I broke on purpose, what the monitor did about it, and — the part I found
-more useful — what it failed to notice until I fixed it.
+What I broke on purpose, what the monitor did about it, and, the part I found
+more useful, what it failed to notice until I fixed it.
 
 Ground rule, same as the other repos: **no number here I did not personally run.**
-Reproduce with `make validate && make simulate`.
+Reproduce with`make validate && make simulate`.
 
 ---
 
@@ -23,7 +23,7 @@ another chance to fire on healthy data.
 
 ---
 
-## Incident 0 — the detector was wrong before any failure was injected
+## Incident 0, the detector was wrong before any failure was injected
 
 Three bugs, all found by testing rather than by reading the code. Every one of
 them would have shipped.
@@ -40,7 +40,7 @@ Fixed by excluding monotonic time features from monitoring.
 
 ### 0b. The most detectable failure in production was invisible
 
-I simulated the identity provider going down — every `id_*` column arrives null.
+I simulated the identity provider going down, every`id_*` column arrives null.
 The monitor said **healthy**.
 
 The KS test drops non-finite values before comparing. A column that is 100% null
@@ -51,14 +51,14 @@ Fixed by tracking missing rate per feature as a signal in its own right,
 independent of the distribution test. There is a test for it now, because this
 is the kind of bug that comes back.
 
-### 0c. My thresholds were guesses, and both were wrong — in opposite directions
+### 0c. My thresholds were guesses, and both were wrong, in opposite directions
 
-`BATCH_DRIFT_SHARE = 0.15` — required 6 of 40 features to fire. Measured
+`BATCH_DRIFT_SHARE = 0.15`, required 6 of 40 features to fire. Measured
 feature-level false-alarm rate on the null is **0 of 40**, so demanding six was
 throwing away nearly all sensitivity.
 
-`NULL_JUMP = 0.10` — missing rates move on their own over time. On healthy
-forward traffic `D4` shifts **14.2%** with nothing broken, so a 10% trigger
+`NULL_JUMP = 0.10`, missing rates move on their own over time. On healthy
+forward traffic`D4` shifts **14.2%** with nothing broken, so a 10% trigger
 fired on *every* batch including both controls. I went from a detector that
 caught 1 of 3 failures to one that flagged 5 of 5 scenarios, controls included.
 A 100% alarm rate is exactly as useless as a 0% detection rate.
@@ -67,7 +67,7 @@ Both are now set against measured behaviour rather than intuition.
 
 ---
 
-## The healthy control — how often does it fire on nothing?
+## The healthy control, how often does it fire on nothing?
 
 Two disjoint random halves of the *same* period, 20 trials. No drift exists by
 construction, so anything flagged is a false alarm.
@@ -79,7 +79,7 @@ construction, so anything flagged is a false alarm.
 | Benjamini-Hochberg | 0.0 | 0.0 | 0.0% |
 
 **KS testing alone flags 3.35 of 40 features on identical data.** That is the
-5% you asked for, arriving as noise, every batch, forever — the thing most
+5% you asked for, arriving as noise, every batch, forever, the thing most
 drift dashboards display as "3 features drifted".
 
 The correction I built for it is not what fixes it. The **PSI effect-size gate**
@@ -94,21 +94,21 @@ claiming credit for the wrong mechanism is its own kind of wrong.
 
 | scenario | caught? | how |
 |---|---|---|
-| healthy (control) | **no** ✓ | correct — 1/40 features, prediction PSI 0.020 |
-| currency units bug | **yes** | prediction PSI **0.494**, `TransactionAmt` PSI 11.9 |
-| new customer segment | **yes** | 3/40 features, `card1_freq` PSI 0.564 |
-| identity feed outage | **yes** | `id_31` missing rate **+100%** |
-| label shift only | **no** ✓ | correct by construction — see below |
+| healthy (control) | **no** ✓ | correct, 1/40 features, prediction PSI 0.020 |
+| currency units bug | **yes** | prediction PSI **0.494**,`TransactionAmt` PSI 11.9 |
+| new customer segment | **yes** | 3/40 features,`card1_freq` PSI 0.564 |
+| identity feed outage | **yes** |`id_31` missing rate **+100%** |
+| label shift only | **no** ✓ | correct by construction, see below |
 
 **3 of 3 real failures caught, 0 false alarms on 2 controls.**
 
-The outage is caught *only* by the missing-rate rule — 1/40 features and
+The outage is caught *only* by the missing-rate rule, 1/40 features and
 prediction PSI 0.033, both below their thresholds. Without incident 0b's fix it
 sails straight through.
 
 The currency bug is caught most loudly by the **prediction** distribution, not
 the inputs: amounts ×100 push predicted fraud from 4.29% to 6.13% mean. That is
-the argument for monitoring outputs alongside inputs — one number, no feature
+the argument for monitoring outputs alongside inputs, one number, no feature
 selection needed, and it moved first.
 
 ### The scenario that is *supposed* to fail
@@ -142,12 +142,12 @@ only on the baseline period so the evaluation is genuinely out-of-sample:
 | 8 | 0.050 | 0.075 | **yes** | 0.8802 | 0.117 |
 
 The model loses **0.060 to 0.137 AUC** on real traffic with nothing injected and
-nothing broken. No bug — just time passing.
+nothing broken. No bug, just time passing.
 
 Two things matter here.
 
 **First, an in-sample evaluation would have hidden all of it.** My initial run
-scored the shipped model on these windows and got 0.97–0.99 with drops near
+scored the shipped model on these windows and got 0.97 to 0.99 with drops near
 zero, because that model was trained on this exact data. Real degradation was
 invisible until the probe model made the evaluation honest. Same lesson as the
 fraud repo, in a new costume: the measurement was broken before the thing being
@@ -171,29 +171,29 @@ complaining has been tuned into decoration.
 
 Ordered by what the evidence supports, not by what sounds most decisive.
 
-**Currency units bug — page immediately, roll back the upstream change.** This
+**Currency units bug, page immediately, roll back the upstream change.** This
 is a broken input contract, not model decay. Retraining on corrupted data would
 bake the bug in. The fix belongs in the feed, and serving should reject rather
-than score: a schema/range assertion on `TransactionAmt` at the API boundary
+than score: a schema/range assertion on`TransactionAmt` at the API boundary
 catches this before a prediction is ever made, which is strictly better than
 detecting it in aggregate afterwards.
 
-**Identity feed outage — degrade deliberately, do not silently score.** The
-model still returns numbers with every `id_*` null, and they are worse numbers.
+**Identity feed outage, degrade deliberately, do not silently score.** The
+model still returns numbers with every`id_*` null, and they are worse numbers.
 Better behaviour is an explicit low-confidence path: flag affected predictions,
 route them to manual review, and alert the provider. The error-analysis in the
 fraud repo already showed AUC is 0.7066 on rows without identity data versus
 0.88 overall, so the cost of that outage is quantified rather than guessed.
 
-**New customer segment — do not roll back, retrain.** Nothing is broken; the
+**New customer segment, do not roll back, retrain.** Nothing is broken; the
 population genuinely changed. A rollback restores a model that knows even less
 about the new cohort. This is the case for scheduled retraining on recent data,
 with the caveat the fraud repo measured: expanding-window CV *underestimates* a
 model trained on everything, so the retrain should be evaluated on a fresh
 forward window rather than by CV score.
 
-**Gradual temporal decay — schedule retraining, and stop treating drift alerts
-as the trigger.** 0.06–0.14 AUC lost over the period with no incident at all.
+**Gradual temporal decay, schedule retraining, and stop treating drift alerts
+as the trigger.** 0.06 to 0.14 AUC lost over the period with no incident at all.
 The honest conclusion from the −0.709 correlation is that input drift is a poor
 proxy for the thing I actually care about. The real fix is measuring performance
 directly on delayed labels; drift monitoring is what you run while waiting for
@@ -205,10 +205,10 @@ them, not a substitute.
 
 - **No labels, so no direct performance monitoring.** The most important signal
   is absent, and everything above is a proxy for it.
-- **Concept drift is invisible.** Demonstrated, not assumed — see the label-shift
+- **Concept drift is invisible.** Demonstrated, not assumed, see the label-shift
   control.
 - **Batch, not streaming.** Detection latency is one batch.
-- **Training/serving skew is unguarded.** `featurize.py` re-implements
+- **Training/serving skew is unguarded.**`featurize.py` re-implements
   transformations that live in another repo. A shared library or feature store
   is the real fix; a test comparing serving features against training ones on
   known rows is the cheap mitigation, and it is not written yet.
