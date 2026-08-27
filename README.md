@@ -174,3 +174,12 @@ calibrating them, in **[INCIDENT.md](INCIDENT.md)**.
 ## 6. Licence
 
 MIT, see [LICENSE](LICENSE).
+
+## References
+
+The papers and sources this implementation follows. Each one is here because
+the code uses the method, the dataset or the metric it describes.
+
+- **Sculley, Holt, Golovin et al. Hidden Technical Debt in Machine Learning Systems. NeurIPS 2015.** the failure modes the gating and monitoring here are aimed at.
+- **Ke, Meng, Finley et al. LightGBM. NeurIPS 2017.** the served model.
+- **Rabanser, Günnemann, Lipton. Failing Loudly. NeurIPS 2019.** [arXiv:1810.11953](https://arxiv.org/abs/1810.11953) the drift detection approach.
