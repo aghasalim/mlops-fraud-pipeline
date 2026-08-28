@@ -4,7 +4,7 @@ What I broke on purpose, what the monitor did about it, and, the part I found
 more useful, what it failed to notice until I fixed it.
 
 Ground rule, same as the other repos: **no number here I did not personally run.**
-Reproduce with`make validate && make simulate`.
+Reproduce with `make validate && make simulate`.
 
 ---
 
@@ -40,7 +40,7 @@ Fixed by excluding monotonic time features from monitoring.
 
 ### 0b. The most detectable failure in production was invisible
 
-I simulated the identity provider going down, every`id_*` column arrives null.
+I simulated the identity provider going down, every `id_*` column arrives null.
 The monitor said **healthy**.
 
 The KS test drops non-finite values before comparing. A column that is 100% null
@@ -58,7 +58,7 @@ feature-level false-alarm rate on the null is **0 of 40**, so demanding six was
 throwing away nearly all sensitivity.
 
 `NULL_JUMP = 0.10`, missing rates move on their own over time. On healthy
-forward traffic`D4` shifts **14.2%** with nothing broken, so a 10% trigger
+forward traffic `D4` shifts **14.2%** with nothing broken, so a 10% trigger
 fired on *every* batch including both controls. I went from a detector that
 caught 1 of 3 failures to one that flagged 5 of 5 scenarios, controls included.
 A 100% alarm rate is exactly as useless as a 0% detection rate.
@@ -95,8 +95,8 @@ claiming credit for the wrong mechanism is its own kind of wrong.
 | scenario | caught? | how |
 |---|---|---|
 | healthy (control) | **no** ✓ | correct, 1/40 features, prediction PSI 0.020 |
-| currency units bug | **yes** | prediction PSI **0.494**,`TransactionAmt` PSI 11.9 |
-| new customer segment | **yes** | 3/40 features,`card1_freq` PSI 0.564 |
+| currency units bug | **yes** | prediction PSI **0.494**, `TransactionAmt` PSI 11.9 |
+| new customer segment | **yes** | 3/40 features, `card1_freq` PSI 0.564 |
 | identity feed outage | **yes** |`id_31` missing rate **+100%** |
 | label shift only | **no** ✓ | correct by construction, see below |
 
@@ -174,12 +174,12 @@ Ordered by what the evidence supports, not by what sounds most decisive.
 **Currency units bug, page immediately, roll back the upstream change.** This
 is a broken input contract, not model decay. Retraining on corrupted data would
 bake the bug in. The fix belongs in the feed, and serving should reject rather
-than score: a schema/range assertion on`TransactionAmt` at the API boundary
+than score: a schema/range assertion on `TransactionAmt` at the API boundary
 catches this before a prediction is ever made, which is strictly better than
 detecting it in aggregate afterwards.
 
 **Identity feed outage, degrade deliberately, do not silently score.** The
-model still returns numbers with every`id_*` null, and they are worse numbers.
+model still returns numbers with every `id_*` null, and they are worse numbers.
 Better behaviour is an explicit low-confidence path: flag affected predictions,
 route them to manual review, and alert the provider. The error-analysis in the
 fraud repo already showed AUC is 0.7066 on rows without identity data versus

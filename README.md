@@ -22,10 +22,12 @@ monitor caught, and what it missed until I fixed it.
 A fraud model behind FastAPI with CI gating and drift monitoring, and an
 evaluation of whether the drift monitoring is worth having.
 
-Five failure scenarios are injected into the serving data. The monitor catches
-three. The two it misses are the informative ones: a pure label shift changes the
-fraud rate without touching any input distribution, so a monitor watching features
-is structurally blind to it, and no threshold setting fixes that.
+Three failure scenarios are injected into the serving data and the monitor
+catches all three. Two controls run beside them, an untouched batch and a pure
+label shift, and neither is flagged, so no false alarms. The label-shift control
+is the informative one: it changes which transactions are fraudulent without
+touching any input distribution, so a monitor watching features is structurally
+blind to it, and no threshold setting fixes that.
 
 More awkwardly, over eight held-out windows the correlation between the drift
 signal and the actual AUC degradation is **negative**, about −0.71. The window
@@ -33,10 +35,12 @@ with the largest degradation has one of the lowest PSI values; the window with t
 highest PSI has the smallest drop. On this data the signal points the wrong way,
 which is worth knowing before it is wired to a pager.
 
-The multiplicity control is the part that works cleanly. Forty features tested per
-batch is forty chances to be unlucky, and an uncorrected KS test flags 3.35
-features per batch on healthy data. Both Benjamini-Hochberg and Bonferroni take
-that to zero false alarms.
+The false alarms are controlled, but not by the mechanism I built for them.
+Forty features tested per batch is forty chances to be unlucky, and a bare KS
+test flags 3.35 features per batch on healthy data. The PSI effect-size gate is
+what removes those: with the gate on and no correction at all, healthy batches
+flag 0.0 features. Benjamini-Hochberg and Bonferroni sit at 0.0 too, so on this
+data they have nothing left to do. Section 1.2 has the detail.
 
 **Contributions.** (i) Injected-failure scenarios with the misses reported rather
 than tuned away. (ii) A direct comparison of the drift signal against measured
@@ -59,7 +63,7 @@ The three findings I would actually want to be asked about:
 
 **1. My detector was broken before I injected anything.** Three bugs, all found
 by testing rather than reading code. The worst: I simulated the identity
-provider going down, every`id_*` column arriving null, and the monitor
+provider going down, every `id_*` column arriving null, and the monitor
 reported **healthy**. A KS test drops non-finite values, so a 100%-null column
 has nothing left to compare and scores PSI 0. The single most conspicuous
 failure in production produced a *cleaner* report than normal traffic.
@@ -106,7 +110,7 @@ threshold passes 7.5% the fault stops alerting too.*
 |---|---|---|
 | healthy (control) | **no**, correct | correct, 1/40 features, prediction PSI 0.020 |
 | currency units bug | **yes** | prediction PSI **0.494** |
-| new customer segment | **yes** | 3/40 features,`card1_freq` PSI 0.564 |
+| new customer segment | **yes** | 3/40 features, `card1_freq` PSI 0.564 |
 | identity feed outage | **yes** |`id_31` missing rate **+100%** |
 | label shift only | **no**, correct | correct by construction |
 
@@ -135,11 +139,11 @@ those regress.
 make serve
 ```
 
-Then`curl -X POST localhost:8000/predict -H 'content-type: application/json' -d '{"TransactionAmt": 120.0}'`
+Then `curl -X POST localhost:8000/predict -H 'content-type: application/json' -d '{"TransactionAmt": 120.0}'`
 
 Reproducing the experiments needs the IEEE-CIS data (see
 [ieee-fraud-ml](https://github.com/aghasalim/ieee-fraud-ml) for the Kaggle
-fetch); point`IEEE_DATA` at it:
+fetch); point `IEEE_DATA` at it:
 
 ```bash
 make validate && make simulate && make dashboard
@@ -159,7 +163,7 @@ make validate && make simulate && make dashboard
 | monitored set | top 40 by gain importance | monitoring all 443 adds noise and alert slots, not coverage |
 
 **The deploy gate blocks, and there are tests proving it.** A gate that has only
-ever returned`true` is indistinguishable from no gate, so`test_gate.py`
+ever returned `true` is indistinguishable from no gate, so `test_gate.py`
 asserts that a model with AUC 0.60, one trained on 1,000 rows, one whose feature
 count doubled, and one that fails to load are each rejected.
 
