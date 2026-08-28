@@ -9,3 +9,4 @@ mlflow.db
 mlruns/
 mlartifacts/
 # model.pkl is committed (1.2 MB): the service and image need it.
+artifacts/baseline.json

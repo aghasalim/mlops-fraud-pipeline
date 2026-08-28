@@ -45,6 +45,11 @@ deployment gate that blocks on model checks rather than on a metric threshold.
 
 ---
 
+The baseline profile is not committed. It holds a 20,000 row reference sample
+of IEEE-CIS features, and that competition data is not mine to redistribute, so
+`artifacts/baseline.json` is gitignored and rebuilt from your own copy of the
+raw csvs. Serving runs without it, monitoring does not.
+
 ## 1. The short version
 
 **3 of 3 injected failures caught, 0 false alarms on 2 controls.** That is the
