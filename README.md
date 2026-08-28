@@ -99,11 +99,11 @@ threshold passes 7.5% the fault stops alerting too.*
 
 | scenario | caught? | how |
 |---|---|---|
-| healthy (control) | **no** ✓ | correct, 1/40 features, prediction PSI 0.020 |
+| healthy (control) | **no**, correct | correct, 1/40 features, prediction PSI 0.020 |
 | currency units bug | **yes** | prediction PSI **0.494** |
 | new customer segment | **yes** | 3/40 features,`card1_freq` PSI 0.564 |
 | identity feed outage | **yes** |`id_31` missing rate **+100%** |
-| label shift only | **no** ✓ | correct by construction |
+| label shift only | **no**, correct | correct by construction |
 
 The last row is a negative control and is *supposed* to be missed: it changes
 only which transactions are fraudulent, leaving every input untouched. **No
