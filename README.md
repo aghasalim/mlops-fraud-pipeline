@@ -91,6 +91,12 @@ worse than no monitor, because it consumes attention.
 
 ![the alerting rule window by window](reports/figures/calibration-windows.png)
 
+![sweeping the batch alert threshold](reports/threshold-sweep.gif)
+
+*Same eight windows, and the only thing moving is the alert threshold: the
+windows and the injected new segment fault stay where they are, and once the
+threshold passes 7.5% the fault stops alerting too.*
+
 | scenario | caught? | how |
 |---|---|---|
 | healthy (control) | **no** ✓ | correct, 1/40 features, prediction PSI 0.020 |
