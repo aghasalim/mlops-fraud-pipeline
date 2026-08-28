@@ -3,7 +3,7 @@
 Four scenarios, chosen so the set is not rigged. Two are the kind of break a
 monitor is supposed to catch, one is a real-world shift taken from the data
 rather than invented, and one is a failure that is genuinely invisible to
-input-distribution monitoring — included precisely because a scenario list where
+input-distribution monitoring, included precisely because a scenario list where
 everything gets caught tells you nothing about the detector's limits.
 
 Run with `make simulate`.

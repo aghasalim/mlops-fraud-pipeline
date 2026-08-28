@@ -10,8 +10,8 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src.pipeline import config  # noqa: E402
 
-st.set_page_config(page_title="Fraud model monitoring", page_icon="📈", layout="wide")
-st.title("Fraud model — monitoring")
+st.set_page_config(page_title="Fraud model monitoring", layout="wide")
+st.title("Fraud model monitoring")
 
 R = config.REPORTS
 if not R.exists():
@@ -40,7 +40,7 @@ if hc is not None:
     st.dataframe(hc, use_container_width=True, hide_index=True)
     st.caption(
         "Two disjoint random halves of the same period, 20 trials. KS alone "
-        "flags ~3.4 of 40 features on identical data — the 5% you asked for, "
+        "flags ~3.4 of 40 features on identical data, the 5% you asked for, "
         "arriving as noise. The PSI effect-size gate removes all of it."
     )
 
@@ -52,7 +52,7 @@ if dd is not None:
     c2.line_chart(dd.set_index("window")[["share_flagged", "pred_psi"]])
     st.dataframe(dd, use_container_width=True, hide_index=True)
     st.caption(
-        "Prediction PSI correlates −0.709 with AUC loss — it moves the wrong way. "
+        "Prediction PSI correlates -0.709 with AUC loss, it moves the wrong way. "
         "The output distribution staying put is not evidence the model is fine."
     )
 
