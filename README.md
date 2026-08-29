@@ -40,7 +40,7 @@ Forty features tested per batch is forty chances to be unlucky, and a bare KS
 test flags 3.35 features per batch on healthy data. The PSI effect-size gate is
 what removes those: with the gate on and no correction at all, healthy batches
 flag 0.0 features. Benjamini-Hochberg and Bonferroni sit at 0.0 too, so on this
-data they have nothing left to do. Section 1.2 has the detail.
+data they have nothing left to do. Finding 2 in section 1 has the detail.
 
 **Contributions.** (i) Injected-failure scenarios with the misses reported rather
 than tuned away. (ii) A direct comparison of the drift signal against measured
