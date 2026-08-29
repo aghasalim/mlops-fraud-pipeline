@@ -94,11 +94,11 @@ claiming credit for the wrong mechanism is its own kind of wrong.
 
 | scenario | caught? | how |
 |---|---|---|
-| healthy (control) | **no** ✓ | correct, 1/40 features, prediction PSI 0.020 |
+| healthy (control) | **no** | correct, 1/40 features, prediction PSI 0.020 |
 | currency units bug | **yes** | prediction PSI **0.494**, `TransactionAmt` PSI 11.9 |
 | new customer segment | **yes** | 3/40 features, `card1_freq` PSI 0.564 |
 | identity feed outage | **yes** | `id_31` missing rate **+100%** |
-| label shift only | **no** ✓ | correct by construction, see below |
+| label shift only | **no** | correct by construction, see below |
 
 **3 of 3 real failures caught, 0 false alarms on 2 controls.**
 
