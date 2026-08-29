@@ -111,7 +111,7 @@ threshold passes 7.5% the fault stops alerting too.*
 | healthy (control) | **no**, correct | correct, 1/40 features, prediction PSI 0.020 |
 | currency units bug | **yes** | prediction PSI **0.494** |
 | new customer segment | **yes** | 3/40 features, `card1_freq` PSI 0.564 |
-| identity feed outage | **yes** |`id_31` missing rate **+100%** |
+| identity feed outage | **yes** | `id_31` missing rate **+100%** |
 | label shift only | **no**, correct | correct by construction |
 
 The last row is a negative control and is *supposed* to be missed: it changes
@@ -158,7 +158,7 @@ make validate && make simulate && make dashboard
 | serving | FastAPI + Pydantic | request validation is a monitoring surface: a negative amount is a 422, not a prediction |
 | container | Docker, non-root, healthcheck | a process reachable from the network is the last place to run privileged |
 | registry | MLflow (SQLite backend) | the file store is in maintenance mode and now raises outright |
-| gate |`registry.py` exits non-zero | CI depends on the gate as a *job dependency*, not a check mark someone is trusted to read |
+| gate | `registry.py` exits non-zero | CI depends on the gate as a *job dependency*, not a check mark someone is trusted to read |
 | drift | KS + PSI + missing-rate | significance, effect size, and the thing distribution tests are blind to |
 | monitored set | top 40 by gain importance | monitoring all 443 adds noise and alert slots, not coverage |
 
@@ -179,7 +179,7 @@ Stated because a monitoring write-up without a limits section is marketing:
 - **Concept drift is invisible**: demonstrated by the negative control, not
   assumed.
 - **Batch, not streaming.** Detection latency is one batch.
-- **Training/serving skew is unguarded.**`featurize.py` re-implements
+- **Training/serving skew is unguarded.** `featurize.py` re-implements
   transformations living in another repo; a shared library or feature store is
   the real fix and is not here.
 

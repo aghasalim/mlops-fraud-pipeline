@@ -97,7 +97,7 @@ claiming credit for the wrong mechanism is its own kind of wrong.
 | healthy (control) | **no** ✓ | correct, 1/40 features, prediction PSI 0.020 |
 | currency units bug | **yes** | prediction PSI **0.494**, `TransactionAmt` PSI 11.9 |
 | new customer segment | **yes** | 3/40 features, `card1_freq` PSI 0.564 |
-| identity feed outage | **yes** |`id_31` missing rate **+100%** |
+| identity feed outage | **yes** | `id_31` missing rate **+100%** |
 | label shift only | **no** ✓ | correct by construction, see below |
 
 **3 of 3 real failures caught, 0 false alarms on 2 controls.**
@@ -208,7 +208,7 @@ them, not a substitute.
 - **Concept drift is invisible.** Demonstrated, not assumed, see the label-shift
   control.
 - **Batch, not streaming.** Detection latency is one batch.
-- **Training/serving skew is unguarded.**`featurize.py` re-implements
+- **Training/serving skew is unguarded.** `featurize.py` re-implements
   transformations that live in another repo. A shared library or feature store
   is the real fix; a test comparing serving features against training ones on
   known rows is the cheap mitigation, and it is not written yet.
