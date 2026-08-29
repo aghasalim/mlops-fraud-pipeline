@@ -68,8 +68,9 @@ def outside_code(line: str):
 @pytest.mark.parametrize("path", markdown_files(), ids=lambda p: str(p))
 def test_no_collapsed_tables(path: Path):
     """A table squeezed onto one line renders as literal pipes on GitHub."""
-    bad = [n for n, l in prose_lines(path)
-           if len(l) > 200 and "|" in l and "---" in l and not SEPARATOR.match(l.strip())]
+    bad = [n for n, text in prose_lines(path)
+           if len(text) > 200 and "|" in text and "---" in text
+           and not SEPARATOR.match(text.strip())]
     assert not bad, f"{path.relative_to(ROOT)}: table collapsed onto one line at {bad}"
 
 
@@ -93,6 +94,6 @@ def test_code_spans_are_not_fused(path: Path):
 @pytest.mark.parametrize("path", markdown_files(), ids=lambda p: str(p))
 def test_plain_ascii_punctuation(path: Path):
     """No em dashes, en dashes or emoji. Maths symbols are fine."""
-    bad = [(n, c) for n, l in prose_lines(path)
-           for c in l if c in "—–" or EMOJI.match(c)]
+    bad = [(n, c) for n, text in prose_lines(path)
+           for c in text if c in "—–" or EMOJI.match(c)]
     assert not bad, f"{path.relative_to(ROOT)}: non-plain punctuation at {bad[:5]}"
