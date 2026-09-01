@@ -1,0 +1,11 @@
+[package]
+name = "permute-check"
+version = "0.1.0"
+edition = "2021"
+
+# No dependencies on purpose. CI fetches nothing, and the generator below is
+# small enough to read, which matters more here than having a good one.
+[dependencies]
+
+[profile.release]
+opt-level = 3

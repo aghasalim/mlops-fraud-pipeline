@@ -31,6 +31,43 @@ jobs:
           python -m src.pipeline.registry
           echo "deployable=true" >> "$GITHUB_OUTPUT"
 
+  # Differential verification: the numbers in README.md and INCIDENT.md are
+  # recomputed from reports/ by seven implementations that share no code, and
+  # this fails if any two of them disagree. See README section 6.
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # sqlite3, gcc, go, cargo, node and java are on the runner already. R is
+      # not, and the install is guarded so a future runner image that ships it
+      # does not pay for this step.
+      - name: R, if the runner does not have it
+        run: |
+          command -v Rscript || {
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends r-base-core
+          }
+
+      - name: recompute every published number
+        run: ./verify/verify.sh
+
+      # A check that has only ever passed is indistinguishable from no check.
+      - name: the checks must reject a corrupted results file
+        run: |
+          sed -i 's/^5,44290,0.1,0.044,/5,44290,0.1,0.144,/' \
+            reports/drift_vs_degradation.csv
+          if git diff --quiet reports/drift_vs_degradation.csv; then
+            echo "the corruption did not apply, so this proves nothing"
+            exit 1
+          fi
+          if ./verify/verify.sh; then
+            echo "the checks passed on a corrupted file, so they check nothing"
+            exit 1
+          fi
+          git checkout -- reports/drift_vs_degradation.csv
+          ./verify/verify.sh
+
   build:
     needs: test
     if: needs.test.outputs.deployable == 'true'
