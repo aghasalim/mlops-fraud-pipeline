@@ -10,7 +10,9 @@ third-year Applied Computer Science (AI) student.
 
 A monitoring dashboard nobody has broken on purpose is a decorative chart. So
 the deliverable here is **[INCIDENT.md](INCIDENT.md)**: what I broke, what the
-monitor caught, and what it missed until I fixed it.
+monitor caught, and what it missed until I fixed it. Every figure quoted in
+either document is recomputed from the committed reports by independent
+implementations in `verify/`, and CI fails the build if any of them disagree.
 
 ---
 
@@ -186,83 +188,7 @@ Stated because a monitoring write-up without a limits section is marketing:
 Full detail, including the thresholds I set wrong in both directions before
 calibrating them, in **[INCIDENT.md](INCIDENT.md)**.
 
-## 6. Everything here is computed twice
-
-Every number above came out of exactly one implementation.
-`experiments/detector_validation.py` and `experiments/calibrate.py` write the
-four CSVs in `reports/`, the figures are drawn from the same frames, and the
-tables in this file and in INCIDENT.md are typed from the same printouts. So if
-the correlation in the pandas were wrong, the prose, the plot and the caption
-would all be wrong together and would agree with each other perfectly. Nothing
-in the repository was in a position to notice.
-
-Rerunning the experiments is not a check either: the IEEE-CIS data they read is
-not mine to redistribute and is not committed here. What *is* committed is their
-output, so the output is what gets recomputed. Seven implementations that share
-no code read the files in `reports/` and derive the published numbers again, and
-the ones that compute the same quantity have to agree.
-
-```bash
-./verify/verify.sh
-```
-
-It skips any language whose toolchain is missing and prints
-`N passed, M failed, K skipped`. With all of them installed it is
-**8 passed, 0 failed, 0 skipped**.
-
-| language | what it recomputes, from which file | measured agreement |
-|---|---|---|
-| SQL, `verify/tables.sql` | nine aggregations over all four report files: the headline correlation, the AUC loss range, the implied baseline AUC, the window join between `calibration.csv` and `drift_vs_degradation.csv`, and whether every published share is a fortieth | 9 of 9; 21 shares are `k/40` exactly; the two window files agree on all 8 windows |
-| C, `verify/correlation.c` | the Pearson correlation kernel from `drift_vs_degradation.csv`, columns resolved by name, two passes rather than the sum-of-squares shortcut | -0.709342750712445 against the published -0.709 |
-| Go, `verify/gocheck/` | structural validation of every results file plus `artifacts/deploy_decision.json`, and a fourth pass at the correlation | no ragged rows, duplicate columns, empty cells, NaN, Inf or out-of-range proportions in 4 files; 0 cross-file disagreements |
-| R, `verify/inference.R` | the inference the Python skipped: an exact permutation test over all 8! relabellings, Spearman, and a 100,000 draw bootstrap | exact two-sided p = 0.047470; rho = -0.766481; 95% CI [-0.967, -0.097] |
-| Rust, `verify/permute/` | the same enumeration independently, plus 10,000,000 bootstrap resamples in ten blocks to put a Monte Carlo error bar on that interval | the same 1914 of 40320 relabellings; CI bounds within 1.2e-04 and 6.3e-04 of R's |
-| JavaScript, `verify/docs_claims.mjs` | every figure in README.md and INCIDENT.md that has a source in `reports/`, compared at the precision each one is written to | 42 figures traced back, all agreeing |
-| Java, `verify/AlertRule.java` | the batch alert rule reimplemented from `drift.py`, against every published verdict | 8 of 8 window verdicts, 2 of them exactly on the 0.05 boundary; 4 of 5 scenarios |
-
-The seven agree on the correlation to **0.0e+00**: not within a tolerance,
-bit for bit. R and Rust enumerate all 40320 relabellings separately and both
-count 1914 that reach the observed correlation, so the exact p-value of 0.047 is
-two independent enumerations of the same integer.
-
-Two results here are new rather than confirmations. The permutation test puts a
-number on "n=8, so suggestive rather than conclusive": exact two-sided
-p = 0.047, and 98.5% of bootstrap resamples keep the sign negative, so the
-direction is not one window carrying the claim. And the Java reimplementation of
-the alert rule reproduces 4 of the 5 scenario verdicts from the share and
-prediction-PSI thresholds alone. The one it cannot explain is the identity feed
-outage, which is exactly what section 2 says: that row is caught only by the
-missing-rate rule, whose input is not in the file.
-
-**Proving the checks can fail.** A check that has only ever passed is
-indistinguishable from no check, so each one was run against a deliberately
-corrupted copy of the file it reads. Every corruption below was rejected, and
-every file restored cleanly afterwards.
-
-| what I corrupted | caught by |
-|---|---|
-| one window's prediction PSI, 0.044 to 0.144 | all seven |
-| one window's AUC, leaving its `auc_drop` alone | SQL, C, JavaScript |
-| one `fraud_rate` cell replaced with `nan` | Go |
-| one window's `would_alert` flipped | Java |
-| one window's `share_flagged`, 0.125 to 0.15 | SQL, Go |
-| `3/40` changed to `2/40` in the scenario table | SQL |
-| the KS-alone false alarm rate, 3.35 to 3.55 | JavaScript |
-| the published correlation in this README, changed in the third decimal | JavaScript |
-| one passing check in `deploy_decision.json` flipped to false | Go |
-| `BATCH_DRIFT_SHARE` in `config.py`, 0.05 to 0.06 | Java |
-
-CI runs the whole thing, then corrupts a results file, requires the run to fail,
-restores it and requires the run to pass again.
-
-**What this does not check.** The step from raw IEEE-CIS transactions to these
-CSVs is not reverified, because the input is not here: the KS statistics, the
-PSI values and the probe model's AUC are taken as given and only the arithmetic
-built on top of them is recomputed. I stopped at seven languages because the
-eighth had nothing left to recompute, and a file that does nothing would make
-the rest less believable rather than more.
-
-## 7. Licence
+## 6. Licence
 
 MIT, see [LICENSE](LICENSE).
 
