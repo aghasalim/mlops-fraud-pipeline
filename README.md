@@ -5,14 +5,15 @@
 [![license](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 The fraud model from [ieee-fraud-ml](https://github.com/aghasalim/ieee-fraud-ml)
-served behind FastAPI, versioned, gated by CI, and monitored, built by a
-third-year Applied Computer Science (AI) student.
+served behind FastAPI, versioned, gated by CI, and monitored.
 
 A monitoring dashboard nobody has broken on purpose is a decorative chart. So
 the deliverable here is **[INCIDENT.md](INCIDENT.md)**: what I broke, what the
-monitor caught, and what it missed until I fixed it. Every figure quoted in
-either document is recomputed from the committed reports by independent
-implementations in `verify/`, and CI fails the build if any of them disagree.
+monitor caught, and what it missed until I fixed it. About sixty figures are
+quoted between the two documents, and `verify/` traces every one back to
+`reports/` in C, Java, Rust, Go, R, SQL and JavaScript. If a number in the prose
+stops matching the report it came from, the build goes red rather than this
+document quietly going stale.
 
 ---
 
@@ -190,12 +191,13 @@ calibrating them, in **[INCIDENT.md](INCIDENT.md)**.
 
 ## 6. Licence
 
-MIT, see [LICENSE](LICENSE).
+MIT. The text is in [LICENSE](LICENSE).
 
 ## References
 
-The papers and sources this implementation follows. Each one is here because
-the code uses the method, the dataset or the metric it describes.
+Three, and each one is load-bearing rather than decorative: the failure taxonomy
+the design answers to, the model that is actually served, and the drift method
+that is actually run.
 
 - **Sculley, Holt, Golovin et al. Hidden Technical Debt in Machine Learning Systems. NeurIPS 2015.** the failure modes the gating and monitoring here are aimed at.
 - **Ke, Meng, Finley et al. LightGBM. NeurIPS 2017.** the served model.
