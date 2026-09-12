@@ -52,7 +52,7 @@ jobs:
       - name: recompute every published number
         run: ./verify/verify.sh
 
-      # A check that has only ever passed is indistinguishable from no check.
+      # A check that cannot fail is not a check.
       - name: the checks must reject a corrupted results file
         run: |
           sed -i 's/^5,44290,0.1,0.044,/5,44290,0.1,0.144,/' \
