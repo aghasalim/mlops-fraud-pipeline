@@ -79,8 +79,7 @@ built the correction believing it was the answer, and it wasn't.
 3. Prediction drift points the wrong way. Across eight windows of real
 traffic the model loses **0.060 to 0.137 AUC** with nothing broken, just time
 passing. Prediction PSI correlates **−0.709** with that loss: the output
-distribution looks most stable exactly where the model is doing worst. n=8, so
-suggestive, not conclusive, but the direction alone kills "predictions
+distribution looks most stable exactly where the model is doing worst. n=8, so only suggestive, but the direction alone kills "predictions
 look normal, so we're fine."
 
 ---
@@ -176,8 +175,7 @@ Stated because a monitoring write-up without a limits section is marketing:
 - **No labels, so no direct performance monitoring.** The most important signal
   is missing; everything here is a proxy for it, and finding 3 is evidence the
   proxy is weak.
-- **Concept drift is invisible**: demonstrated by the negative control, not
-  assumed.
+- **Concept drift is invisible**: demonstrated by the negative control.
 - **Batch, not streaming.** Detection latency is one batch.
 - **Training/serving skew is unguarded.** `featurize.py` re-implements
   transformations living in another repo; a shared library or feature store is
@@ -192,7 +190,7 @@ MIT. The text is in [LICENSE](LICENSE).
 
 ## References
 
-Three, and each one is load-bearing, not decorative: the failure taxonomy
+Three, and each one is load-bearing: the failure taxonomy
 the design answers to, the model that is actually served, and the drift method
 that is actually run.
 
