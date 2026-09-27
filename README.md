@@ -12,7 +12,7 @@ the deliverable here is **[INCIDENT.md](INCIDENT.md)**: what I broke, what the
 monitor caught, and what it missed until I fixed it. About sixty figures are
 quoted between the two documents, and `verify/` traces every one back to
 `reports/` in C, Java, Rust, Go, R, SQL and JavaScript. If a number in the prose
-stops matching the report it came from, the build goes red rather than this
+stops matching the report it came from, the build goes red instead of this
 document quietly going stale.
 
 ---
@@ -45,10 +45,9 @@ what removes those: with the gate on and no correction at all, healthy batches
 flag 0.0 features. Benjamini-Hochberg and Bonferroni sit at 0.0 too, so on this
 data they have nothing left to do. Finding 2 in section 1 has the detail.
 
-**Contributions.** (i) Injected-failure scenarios with the misses reported rather
-than tuned away. (ii) A direct comparison of the drift signal against measured
+Contributions. (i) Injected-failure scenarios with the misses reported instead of tuned away. (ii) A direct comparison of the drift signal against measured
 degradation. (iii) A healthy control quantifying the false-alarm rate. (iv) A
-deployment gate that blocks on model checks rather than on a metric threshold.
+deployment gate that blocks on model checks, not on a metric threshold.
 
 ---
 
@@ -59,19 +58,19 @@ raw csvs. Serving runs without it, monitoring does not.
 
 ## 1. The short version
 
-**3 of 3 injected failures caught, 0 false alarms on 2 controls.** That is the
+3 of 3 injected failures caught, 0 false alarms on 2 controls. That is the
 result the brief asks for, and it is the least interesting thing I found.
 
 The three findings I would actually want to be asked about:
 
-**1. My detector was broken before I injected anything.** Three bugs, all found
-by testing rather than reading code. The worst: I simulated the identity
+1. My detector was broken before I injected anything. Three bugs, all found
+by testing instead of reading code. The worst: I simulated the identity
 provider going down, every `id_*` column arriving null, and the monitor
 reported **healthy**. A KS test drops non-finite values, so a 100%-null column
 has nothing left to compare and scores PSI 0. The single most conspicuous
 failure in production produced a *cleaner* report than normal traffic.
 
-**2. The multiple-testing correction I built isn't what fixes false alarms.**
+2. The multiple-testing correction I built isn't what fixes false alarms.
 On two random halves of identical data, KS testing alone flags **3.35 of 40
 features**, the 5% you asked for, arriving as noise, forever. I added
 Benjamini-Hochberg for it. But the thing that actually removes them is the
@@ -79,11 +78,11 @@ Benjamini-Hochberg for it. But the thing that actually removes them is the
 detectable. With that in place BH and Bonferroni have nothing left to do. I
 built the correction believing it was the answer, and it wasn't.
 
-**3. Prediction drift points the wrong way.** Across eight windows of real
+3. Prediction drift points the wrong way. Across eight windows of real
 traffic the model loses **0.060 to 0.137 AUC** with nothing broken, just time
 passing. Prediction PSI correlates **−0.709** with that loss: the output
 distribution looks most stable exactly where the model is doing worst. n=8, so
-suggestive rather than conclusive, but the direction alone kills "predictions
+suggestive, not conclusive, but the direction alone kills "predictions
 look normal, so we're fine."
 
 ---
@@ -165,7 +164,7 @@ make validate && make simulate && make dashboard
 | drift | KS + PSI + missing-rate | significance, effect size, and the thing distribution tests are blind to |
 | monitored set | top 40 by gain importance | monitoring all 443 adds noise and alert slots, not coverage |
 
-**The deploy gate blocks, and there are tests proving it.** A gate that has only
+The deploy gate blocks, and there are tests proving it. A gate that has only
 ever returned `true` is indistinguishable from no gate, so `test_gate.py`
 asserts that a model with AUC 0.60, one trained on 1,000 rows, one whose feature
 count doubled, and one that fails to load are each rejected.
@@ -195,7 +194,7 @@ MIT. The text is in [LICENSE](LICENSE).
 
 ## References
 
-Three, and each one is load-bearing rather than decorative: the failure taxonomy
+Three, and each one is load-bearing, not decorative: the failure taxonomy
 the design answers to, the model that is actually served, and the drift method
 that is actually run.
 
