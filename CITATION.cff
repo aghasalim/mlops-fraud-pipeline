@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: If you use this work, please cite it as below.
+title: "Production ML pipeline, with the monitoring actually tested"
+abstract: "Fraud model behind FastAPI with CI gating and drift monitoring, where the monitoring is tested against a healthy null."
+type: software
+authors:
+  - family-names: Mustafazada
+    given-names: Aghasalim
+    orcid: "https://orcid.org/0009-0001-8746-4582"
+    affiliation: "Howest University of Applied Sciences"
+repository-code: "https://github.com/aghasalim/mlops-fraud-pipeline"
+url: "https://aghasalim.github.io/"
+license: MIT
+keywords:
+  - ci cd
+  - drift detection
+  - fastapi
+  - fraud detection
+  - machine learning
+  - mlops
+  - model monitoring
