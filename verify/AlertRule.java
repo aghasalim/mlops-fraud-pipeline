@@ -3,7 +3,7 @@
 //
 // src/pipeline/drift.py decides that a batch has drifted when any of three
 // things is true: a monitored feature's missing rate moved by NULL_JUMP or
-// more, the share of flagged features reached BATCH_DRIFT_SHARE, or the
+// more (or went to 100% from below it), the share of flagged features reached BATCH_DRIFT_SHARE, or the
 // prediction PSI reached PSI_MAJOR. Those verdicts are published as the
 // would_alert column of reports/calibration.csv and the caught column of
 // reports/simulated_failures.csv, and the README's headline result is a count
@@ -154,11 +154,13 @@ public class AlertRule {
                         calib.size() - wrong, calib.size(), boundary, BATCH_DRIFT_SHARE));
 
         // 2. The missing-rate column has to be consistent with its own threshold.
+        //    One way only: a column going fully null also counts, with a move
+        //    smaller than NULL_JUMP, and this file does not record which.
         int inconsistent = 0;
         for (Map<String, String> row : calib) {
             boolean counted = num(row, "n_null_shift") > 0;
             boolean implied = num(row, "max_null_delta") >= NULL_JUMP;
-            if (counted != implied) {
+            if (implied && !counted) {
                 inconsistent++;
             }
         }

@@ -62,6 +62,8 @@ BATCH_DRIFT_SHARE = float(os.getenv("BATCH_DRIFT_SHARE", "0.05"))
 # so a 10% trigger fired on every batch including both controls. 0.35 sits above
 # the natural drift measured across the eight healthy windows and still catches
 # an outage, which takes a column to 100%.
+# A column that goes to 100% null also alarms on its own in drift.compare,
+# whatever the size of the jump, so a mostly-null column cannot die quietly.
 NULL_JUMP = float(os.getenv("DRIFT_NULL_JUMP", "0.35"))
 
 # Monitoring every one of the 443 features is possible but not informative --
