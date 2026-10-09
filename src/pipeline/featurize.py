@@ -6,6 +6,7 @@ That is training/serving skew, and it is one of the most common ways a
 production model degrades without anything appearing to break. The honest fixes
 are a shared library or a feature store; the honest mitigation here is a test
 that asserts serving features reproduce the training ones on known rows.
+That test is test_serving_amount_features_match_training in tests/test_serving.py.
 """
 from __future__ import annotations
 
