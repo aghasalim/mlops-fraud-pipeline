@@ -107,16 +107,19 @@ def compare(
         # see. Found by simulating an identity-provider outage and watching it
         # sail through.
         null_now = float(np.mean(~finite))
-        null_delta = abs(null_now - float(base_null.get(c, null_now)))
+        null_base = float(base_null.get(c, null_now))
+        null_delta = abs(null_now - null_base)
 
         if len(cur) < 20 or len(ref) < 20:
             rows.append({"feature": c, "ks_stat": 0.0, "p_raw": 1.0, "psi": 0.0,
-                         "null_rate": null_now, "null_delta": null_delta})
+                         "null_rate": null_now, "null_base": null_base,
+                         "null_delta": null_delta})
             continue
         ks = stats.ks_2samp(ref, cur)
         rows.append({"feature": c, "ks_stat": float(ks.statistic),
                      "p_raw": float(ks.pvalue), "psi": psi(ref, cur),
-                     "null_rate": null_now, "null_delta": null_delta})
+                     "null_rate": null_now, "null_base": null_base,
+                     "null_delta": null_delta})
 
     f = pd.DataFrame(rows).set_index("feature")
     p = f["p_raw"].to_numpy()
@@ -131,7 +134,11 @@ def compare(
     # detectable and large enough to matter. Either alone is noise at this n.
     f["flagged"] = f["flagged"] & (f["psi"] >= config.PSI_MODERATE)
     # ...or if its missing rate moved, which the distribution test cannot see.
-    f["null_shift"] = f["null_delta"] >= config.NULL_JUMP
+    # A column that was already mostly null can go fully null by less than
+    # NULL_JUMP (70% -> 100% is a 0.30 move), and that is still an outage, so
+    # any new 100%-null column alarms regardless of the size of the jump.
+    went_dark = (f["null_rate"] >= 1.0) & (f["null_base"] < 1.0)
+    f["null_shift"] = (f["null_delta"] >= config.NULL_JUMP) | went_dark
     f["flagged"] = f["flagged"] | f["null_shift"]
 
     n_flagged = int(f["flagged"].sum())

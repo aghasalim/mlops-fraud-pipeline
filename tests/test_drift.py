@@ -47,6 +47,17 @@ def test_all_null_column_is_caught(base):
     assert any("missing rate" in x for x in r.reasons)
 
 
+def test_mostly_null_column_going_fully_null_is_caught(base):
+    """A column that is 70% null on a normal day only moves 0.30 when its feed
+    dies, under NULL_JUMP, so the absolute threshold alone stayed quiet."""
+    base = {**base, "null_rate": {"a": 0.7, "b": 0.0}}
+    b = _batch()
+    b["a"] = np.nan
+    r = drift.compare(base, b, np.random.default_rng(2).beta(1, 30, 5000))
+    assert r.drifted
+    assert any("missing rate" in x for x in r.reasons)
+
+
 def test_psi_is_symmetric_in_sign_but_not_zero_on_shift():
     rng = np.random.default_rng(0)
     x, y = rng.normal(0, 1, 5000), rng.normal(1, 1, 5000)
