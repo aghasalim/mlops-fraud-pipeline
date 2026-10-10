@@ -145,7 +145,7 @@ through.
 make setup && make test
 ```
 
-There are 34 tests. The drift tests encode bugs that really shipped, so they'll
+There are 21 tests. The drift tests encode bugs that really shipped, so they'll
 fail if any of those come back.
 
 ```bash
