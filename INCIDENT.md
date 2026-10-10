@@ -102,9 +102,11 @@ claiming credit for the wrong mechanism is its own kind of wrong.
 
 **3 of 3 real failures caught, 0 false alarms on 2 controls.**
 
-The outage is caught *only* by the missing-rate rule, 1/40 features and
-prediction PSI 0.033, both below their thresholds. Without incident 0b's fix it
-sails straight through.
+The outage is caught by the missing-rate rule. After the fully-null fix
+(2026-10-10 rerun) it flags 2/40 features instead of 1/40, which lands exactly
+on the 5% share line, but both are columns the missing-rate rule flagged: `id_31`
+and a mostly-null column that went fully null. No KS or PSI test fires, and
+prediction PSI is 0.033. Without incident 0b's fix it sails straight through.
 
 The currency bug is caught most loudly by the **prediction** distribution, not
 the inputs: amounts ×100 push predicted fraud from 4.29% to 6.13% mean. That is

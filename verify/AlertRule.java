@@ -168,10 +168,10 @@ public class AlertRule {
         check("null shift self-consistent", inconsistent == 0,
                 String.format("largest missing-rate move %.3f against a %.2f threshold", worst, NULL_JUMP));
 
-        // 3. The injected scenarios. The distribution rules alone cannot explain
-        //    the identity feed outage, and the README says so: that row is caught
-        //    by the missing-rate rule, whose input is not in this file. Exactly
-        //    one row must disagree, and it must be that one.
+        // 3. The injected scenarios. Every verdict has to follow from share and
+        //    prediction PSI. The outage gets there only because its two
+        //    missing-rate flags count towards share (2/40, exactly 5%), which
+        //    the README says; this file cannot tell those flags apart.
         List<Map<String, String>> scen = readCsv(root.resolve("reports/simulated_failures.csv"));
         List<String> unexplained = new ArrayList<>();
         for (Map<String, String> row : scen) {
@@ -181,7 +181,7 @@ public class AlertRule {
             }
         }
         check("scenario verdicts",
-                unexplained.size() == 1 && unexplained.get(0).equals("identity feed outage"),
+                unexplained.isEmpty(),
                 String.format("%d of %d explained by share and prediction PSI alone, "
                         + "the exception is %s", scen.size() - unexplained.size(), scen.size(),
                         unexplained.isEmpty() ? "none" : unexplained));
