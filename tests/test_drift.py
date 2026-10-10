@@ -80,3 +80,39 @@ def test_monotonic_features_are_not_monitored():
     comparison and would burn an alert slot permanently."""
     from src.pipeline.baseline import MONOTONIC
     assert "day_index" in MONOTONIC
+
+
+def test_psi_grows_with_shift():
+    rng = np.random.default_rng(0)
+    a = rng.normal(size=5000)
+    small = drift.psi(a, a + 0.2)
+    large = drift.psi(a, a + 2.0)
+    assert large > small > 0
+
+
+def test_bh_is_never_more_permissive_than_raw_alpha():
+    p = np.linspace(0.001, 0.9, 50)
+    assert drift._bh(p, 0.05).sum() <= (p <= 0.05).sum()
+
+
+def test_detector_silent_on_identical_batches_without_null_rates():
+    """The healthy control on eight columns, with a profile that has no
+    null_rate entry, which older baselines do not carry."""
+    rng = np.random.default_rng(0)
+    cols = [f"f{i}" for i in range(8)]
+    a = pd.DataFrame(rng.normal(size=(3000, 8)), columns=cols)
+    b = pd.DataFrame(rng.normal(size=(3000, 8)), columns=cols)
+    preds = rng.random(3000) * 0.1
+    prof = {"monitored": cols, "samples": {c: a[c].tolist() for c in cols},
+            "pred_samples": preds.tolist()}
+    assert not drift.compare(prof, b, rng.random(3000) * 0.1).drifted
+
+
+def test_detector_fires_on_gross_feature_and_prediction_shift():
+    rng = np.random.default_rng(0)
+    cols = [f"f{i}" for i in range(8)]
+    a = pd.DataFrame(rng.normal(size=(3000, 8)), columns=cols)
+    b = pd.DataFrame(rng.normal(size=(3000, 8)) + 5, columns=cols)
+    prof = {"monitored": cols, "samples": {c: a[c].tolist() for c in cols},
+            "pred_samples": (rng.random(3000) * 0.1).tolist()}
+    assert drift.compare(prof, b, rng.random(3000) * 0.1 + 0.5).drifted

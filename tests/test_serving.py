@@ -23,13 +23,17 @@ def test_predict_rejects_out_of_range_input():
     """A negative amount is not a prediction problem, it is a bad request."""
     with TestClient(app) as c:
         assert c.post("/predict", json={"TransactionAmt": -5.0}).status_code == 422
+        assert c.post("/predict", json={"TransactionAmt": 1e9}).status_code == 422
 
 
 def test_large_amount_scores_higher_than_typical():
+    """Guards against the model silently receiving defaults instead of input,
+    a serving bug that returns plausible constants and looks fine."""
     with TestClient(app) as c:
-        lo = c.post("/predict", json={"TransactionAmt": 50.0}).json()["fraud_probability"]
         hi = c.post("/predict", json={"TransactionAmt": 5000.0}).json()["fraud_probability"]
-        assert hi != lo, "amount must actually reach the model"
+        for amt in (10.0, 50.0):
+            lo = c.post("/predict", json={"TransactionAmt": amt}).json()["fraud_probability"]
+            assert hi != lo, "amount must actually reach the model"
 
 
 def test_serving_amount_features_match_training():
