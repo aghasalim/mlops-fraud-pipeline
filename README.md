@@ -120,9 +120,11 @@ input-distribution monitor can see that**, and this one doesn't. It is in the
 list because a scenario set where everything gets caught tells you nothing about
 where the system is blind.
 
-The outage is caught *only* by the missing-rate rule, both the feature-share
-and prediction-PSI signals sit below threshold. Without that fix it sails
-through.
+The outage is caught by the missing-rate rule. It now also sits exactly on the
+5% feature-share line, 2/40, but both of those features are the ones the
+missing-rate rule flagged: since the fully-null fix, a column that goes dark from
+mostly null counts as well as `id_31`. KS and PSI flag none of them, and
+prediction PSI is 0.033. Without the missing-rate rule it sails through.
 
 ---
 

@@ -57,8 +57,9 @@ def scenarios(out: Path) -> Path:
     The interesting thing is that no single signal covers the three real
     failures: the units bug is the only one that moves the prediction
     distribution, the new segment is the only one that trips the feature-share
-    rule, and the outage trips neither. It is caught by the missing-rate rule,
-    which is not a distribution test at all.
+    rule on distribution tests, and the outage trips neither. It is caught by
+    the missing-rate rule, which is not a distribution test at all; the two
+    columns that rule flags are what put the outage on the 5% share line.
     """
     t = pd.read_csv(REPORTS / "simulated_failures.csv").sort_values("pred_psi")
     y = np.arange(len(t))
@@ -84,12 +85,12 @@ def scenarios(out: Path) -> Path:
            fontsize=8.6, color="#555555", va="center")
     b.set_xlim(-0.4, 11)
     b.set_xlabel(f"monitored features flagged (% of {N_MONITORED})")
-    titled(b, "Only the new segment trips the feature-share rule",
-           "the outage clears neither line, so a third rule has to catch it")
+    titled(b, "Only the new segment trips it on distribution tests",
+           "the outage reaches 5% only through its two missing-rate flags")
 
     outage = int(np.where(t.scenario == "identity feed outage")[0][0])
-    b.annotate("caught only by the missing-rate rule:\nevery id_ column arrived null",
-               xy=(t.share.iloc[outage] * 100, outage), xytext=(3.3, outage + 0.02),
+    b.annotate("caught by the missing-rate rule:\nevery id_ column arrived null",
+               xy=(t.share.iloc[outage] * 100, outage), xytext=(5.6, outage + 0.02),
                fontsize=8.6, color="#333333", va="center")
     for i, row in enumerate(t.itertuples()):
         if "control" in row.scenario or row.scenario == "label shift only":
