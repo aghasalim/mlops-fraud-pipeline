@@ -1,5 +1,3 @@
-<p align="center"><img src="assets/banner.jpg" alt="Line drawing of a pipeline with a closed gate in the middle, an alarm bell and a monitoring dial" width="100%"></p>
-
 # Production ML pipeline, with the monitoring actually tested
 
 [![ci](https://github.com/aghasalim/mlops-fraud-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/aghasalim/mlops-fraud-pipeline/actions/workflows/ci.yml)
