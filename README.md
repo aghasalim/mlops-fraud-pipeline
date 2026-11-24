@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/banner.jpg" alt="Line drawing of a pipeline with a closed gate in the middle, an alarm bell and a monitoring dial" width="100%"></p>
+
 # Production ML pipeline, with the monitoring actually tested
 
 [![ci](https://github.com/aghasalim/mlops-fraud-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/aghasalim/mlops-fraud-pipeline/actions/workflows/ci.yml)
@@ -21,6 +23,20 @@ from, the build goes red. That way this document can't quietly go stale.
 
 
 ---
+
+<details>
+<summary>Contents</summary>
+
+- [Abstract](#abstract)
+- [1. The short version](#1-the-short-version)
+- [2. What the monitor did](#2-what-the-monitor-did)
+- [3. Running it](#3-running-it)
+- [4. How it fits together](#4-how-it-fits-together)
+- [5. Limitations](#5-limitations)
+- [6. Licence](#6-licence)
+- [References](#references)
+
+</details>
 
 ## Abstract
 
